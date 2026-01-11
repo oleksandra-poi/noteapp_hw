@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Notes</title>
+    <link rel="stylesheet" href="{% static 'expenses/expenses.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <h1>My Notes</h1>
+
+    <form method="post" class="note-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Add note</button>
+    </form>
+
+    <div class="notes-list">
+        {% for note in notes %}
+            <div class="note-card">
+                <h3>{{ note.title }}</h3>
+                <p>{{ note.text }}</p>
+                <small>{{ note.created_at }}</small>
+            </div>
+        {% empty %}
+            <p>No notes yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+</body>
+</html>
