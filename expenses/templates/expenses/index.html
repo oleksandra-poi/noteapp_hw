@@ -1,32 +1,106 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Notes</title>
+    <meta charset="UTF-8">
+    <title>Notes App</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    >
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'expenses/expenses.css' %}">
 </head>
-<body>
+<body class="bg-light">
 
-<div class="container">
-    <h1>My Notes</h1>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">Notes</a>
+        <div class="navbar-nav">
+            <a class="nav-link active" href="{% url 'home' %}">Home</a>
+            <a class="nav-link" href="#note-form">Add Note</a>
+        </div>
+    </div>
+</nav>
 
-    <form method="post" class="note-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Add note</button>
-    </form>
+<div class="container mt-4">
 
-    <div class="notes-list">
+    <h1 class="text-center mb-4">My Notes</h1>
+
+    <!-- FORM -->
+    <div id="note-form" class="card shadow mb-4">
+        <div class="card-body">
+            <h4 class="card-title">
+                {% if note_to_edit %}Edit Note{% else %}Add Note{% endif %}
+            </h4>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.text.label_tag }}
+                    {{ form.text }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.reminder.label_tag }}
+                    {{ form.reminder }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    {% if note_to_edit %}Update{% else %}Add{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="row">
         {% for note in notes %}
-            <div class="note-card">
-                <h3>{{ note.title }}</h3>
-                <p>{{ note.text }}</p>
-                <small>{{ note.created_at }}</small>
+            <div class="col-md-4">
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ note.title }}</h5>
+                        <p class="card-text">{{ note.text }}</p>
+
+                        <p class="text-muted small">
+                            {{ note.category }} | {{ note.created_at|date:"d M Y" }}
+                        </p>
+
+                        <a href="?edit={{ note.id }}" class="btn btn-sm btn-outline-primary">
+                            Edit
+                        </a>
+
+                        <form method="post"
+                              action="{% url 'delete_note' note.id %}"
+                              class="d-inline">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         {% empty %}
-            <p>No notes yet.</p>
+            <p class="text-center">No notes yet.</p>
         {% endfor %}
     </div>
+
 </div>
 
 </body>
