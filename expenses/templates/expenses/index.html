@@ -20,9 +20,29 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand" href="{% url 'home' %}">Notes</a>
-        <div class="navbar-nav">
-            <a class="nav-link active" href="{% url 'home' %}">Home</a>
-            <a class="nav-link" href="#note-form">Add Note</a>
+
+        <div class="navbar-nav ms-auto align-items-center">
+            {% if user.is_authenticated %}
+                <span class="navbar-text text-white me-3">
+                    Hello, {{ user.username }}
+                </span>
+
+                <a class="nav-link text-white me-2" href="#note-form">
+                    Add Note
+                </a>
+
+                <form method="post" action="{% url 'logout' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-outline-light btn-sm">
+                        Logout
+                    </button>
+                </form>
+            {% else %}
+                <a class="nav-link text-white" href="{% url 'login' %}">
+                    Login
+                </a>
+            {% endif %}
         </div>
     </div>
 </nav>
@@ -31,42 +51,52 @@
 
     <h1 class="text-center mb-4">My Notes</h1>
 
-    <!-- FORM -->
-    <div id="note-form" class="card shadow mb-4">
-        <div class="card-body">
-            <h4 class="card-title">
-                {% if note_to_edit %}Edit Note{% else %}Add Note{% endif %}
-            </h4>
+    {% if user.is_authenticated %}
 
-            <form method="post">
-                {% csrf_token %}
+        <!-- FORM -->
+        <div id="note-form" class="card shadow mb-4">
+            <div class="card-body">
+                <h4 class="card-title">
+                    {% if note_to_edit %}Edit Note{% else %}Add Note{% endif %}
+                </h4>
 
-                <div class="mb-3">
-                    {{ form.title.label_tag }}
-                    {{ form.title }}
-                </div>
+                <form method="post">
+                    {% csrf_token %}
 
-                <div class="mb-3">
-                    {{ form.text.label_tag }}
-                    {{ form.text }}
-                </div>
+                    <div class="mb-3">
+                        {{ form.title.label_tag }}
+                        {{ form.title }}
+                    </div>
 
-                <div class="mb-3">
-                    {{ form.reminder.label_tag }}
-                    {{ form.reminder }}
-                </div>
+                    <div class="mb-3">
+                        {{ form.text.label_tag }}
+                        {{ form.text }}
+                    </div>
 
-                <div class="mb-3">
-                    {{ form.category.label_tag }}
-                    {{ form.category }}
-                </div>
+                    <div class="mb-3">
+                        {{ form.reminder.label_tag }}
+                        {{ form.reminder }}
+                    </div>
 
-                <button type="submit" class="btn btn-success">
-                    {% if note_to_edit %}Update{% else %}Add{% endif %}
-                </button>
-            </form>
+                    <div class="mb-3">
+                        {{ form.category.label_tag }}
+                        {{ form.category }}
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        {% if note_to_edit %}Update{% else %}Add{% endif %}
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
+
+    {% else %}
+        <div class="alert alert-info text-center">
+            Please <a href="{% url 'login' %}">log in</a> to create notes.
+        </div>
+    {% endif %}
+
+
 
     <!-- NOTES -->
     <div class="row">
@@ -78,10 +108,12 @@
                         <p class="card-text">{{ note.text }}</p>
 
                         <p class="text-muted small">
-                            {{ note.category }} | {{ note.created_at|date:"d M Y" }}
+                            {{ note.category }} |
+                            {{ note.created_at|date:"d M Y" }}
                         </p>
 
-                        <a href="?edit={{ note.id }}" class="btn btn-sm btn-outline-primary">
+                        <a href="?edit={{ note.id }}"
+                           class="btn btn-sm btn-outline-primary">
                             Edit
                         </a>
 
